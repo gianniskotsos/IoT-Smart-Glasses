@@ -2,9 +2,12 @@
 
 ## Quick Demo Of Caregiver Web Portal 
 
-<p align="center">
-  <video src="./images/app.mp4" width="750" autoplay loop muted playsinline></video>
-</p>
+
+https://github.com/user-attachments/assets/76878278-ebf8-4f73-bb66-ae07badbc998
+
+
+
+
 
 
 
