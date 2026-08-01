@@ -1,0 +1,82 @@
+
+
+<script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+
+<input type="hidden" id="currentUserID" value="{{user.id}}">
+
+<div class="monitoring-content">
+
+  <section class="card">
+    <h3>Health Metrics</h3>
+    <div class="metrics-grid">
+        <div class="metric">
+            <i class="fa-solid fa-heart-pulse"></i>
+            <span class="label">Heart Rate</span>
+            <span class="value heartRate">--</span>
+        </div>
+        <div class="metric">
+            <i class="fa-solid fa-lungs"></i>
+            <span class="label">SpO₂</span>
+            <span class="value oxygenSaturation">--</span>
+        </div>
+      <div class="metric">
+        <i class="fa-solid fa-person -activityicon" id="activityIcon"></i>
+        <span class="label">Activity</span>
+        <span class="value activity">--</span>
+      </div>
+      <div class="metric">
+        <i class="fa-solid fa-gauge-high"></i>
+        <span class="label">Speed</span>
+        <span class="value speed">--</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h3>System Health</h3>
+    <ul class="status-list">
+      <li>Battery: <strong class="battery"></strong></li>
+      <li>CPU Load: <strong class="cpu"></strong></li>
+      <li>RAM Usage: <strong class="ram"></strong></li>
+      <li>Temperature: <strong class="temp"></strong></li>
+      <li>Continuous runtime: <strong class="runtime"></strong></li>
+    </ul>
+  </section>
+  <section class="graphs-section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <i class="fa-solid fa-chevron-down section-chevron"></i>
+      <h3>User's Graphs</h3>
+    </div>
+    <div class="section-content">
+      <div class="graphs-grid">
+        <iframe src="http://labserver.sense-campus.gr:8087/d-solo/df8pa87y4308wb/fitness-data?from=now-1d&to=now&timezone=browser&refresh=5s&orgId=2&theme=light&panelId=4&__feature.dashboardSceneSolo" width="450" height="200" frameborder="0"></iframe>
+        <iframe src="http://labserver.sense-campus.gr:8087/d-solo/df8pa87y4308wb/fitness-data?from=now-1d&to=now&timezone=browser&refresh=5s&tab=queries&orgId=2&theme=light&panelId=9&__feature.dashboardSceneSolo" width="450" height="200" frameborder="0"></iframe>
+            <div class="graph-container">
+            <button id="toggle-btn" onclick="toggleGraph(this)">See Last Week</button>
+            <iframe id="fitnessIframe" src="http://labserver.sense-campus.gr:8087/d-solo/df8pa87y4308wb/fitness-data?from=now-1d&to=now&timezone=browser&refresh=5s&orgId=2&theme=light&panelId=2&__feature.dashboardSceneSolo" width="450" height="200" frameborder="0"></iframe>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="graphs-section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <i class="fa-solid fa-chevron-down section-chevron"></i>
+      <h3>System's Graphs</h3>
+    </div>
+    <div class="section-content">
+      <div class="graphs-grid">
+        <iframe src="http://labserver.sense-campus.gr:8087/d-solo/df8pa87y4308wb/fitness-data?from=now-12h&to=now&timezone=browser&refresh=5s&tab=queries&orgId=2&theme=light&panelId=5&__feature.dashboardSceneSolo" width="450" height="200" frameborder="0"></iframe>
+        <iframe src="http://labserver.sense-campus.gr:8087/d-solo/df8pa87y4308wb/fitness-data?from=now-12h&to=now&timezone=browser&refresh=5s&tab=queries&orgId=2&theme=light&panelId=6&__feature.dashboardSceneSolo" width="450" height="200" frameborder="0"></iframe>
+        <iframe src="http://labserver.sense-campus.gr:8087/d-solo/df8pa87y4308wb/fitness-data?from=now-12h&to=now&timezone=browser&refresh=5s&tab=queries&orgId=2&theme=light&panelId=7&__feature.dashboardSceneSolo" width="450" height="200" frameborder="0"></iframe>
+        <iframe src="http://labserver.sense-campus.gr:8087/d-solo/df8pa87y4308wb/fitness-data?from=now-12h&to=now&timezone=browser&refresh=5s&tab=queries&orgId=2&theme=light&panelId=8&__feature.dashboardSceneSolo" width="450" height="200" frameborder="0"></iframe>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+    const USER_ID = "{{user.userID}}";
+    const MQTT_TOPIC = `team08_2025/glasses/${USER_ID}/uplink`;
+</script>
+{{!-- <script src="/js/monitoring.js"></script> --}}

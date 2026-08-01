@@ -1,0 +1,631 @@
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>{{title}}</title>
+  <link rel="stylesheet" href="/css/layout.css">
+  {{#if css}}<link rel="stylesheet" href="/css/{{css}}">{{/if}}
+   {{#if customJs}}
+  <script src="/js/{{customJs}}" defer></script>
+  {{/if}}
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+
+<body>
+  {{> header}}
+
+  <main class="page-content">
+    {{{body}}}
+  </main>
+
+{{#if user.userID}}
+    <script>
+    let statusTimeout;
+    const STATUS_THRESHOLD = 120000; 
+    const lastSeenKey = `last_seen_{{user.userID}}`;
+    function setOnline() {
+        const indicator = document.getElementById('user-status-indicator');
+        const statusText = document.getElementById('status-text');
+
+        if (indicator) {
+            indicator.classList.remove('offline');
+            statusText.textContent = 'Online';
+            indicator.title = "The user is online";
+        }
+        localStorage.setItem(lastSeenKey, Date.now());
+        
+        clearTimeout(window.offlineTimer);
+        window.offlineTimer = setTimeout(setOffline, STATUS_THRESHOLD);
+    }
+
+    function setOffline() {
+        const indicator = document.getElementById('user-status-indicator');
+        const statusText = document.getElementById('status-text');
+
+        if (indicator) {
+            indicator.classList.add('offline');
+            statusText.textContent = 'Offline';
+            const lastSeenTs = localStorage.getItem(lastSeenKey);
+            const lastSeenDate = new Date(parseInt(lastSeenTs));
+            const now = new Date();
+
+            let formatOptions = { hour: '2-digit', minute: '2-digit' };
+           
+            if (lastSeenDate.toDateString() !== now.toDateString()) {
+                formatOptions.day = '2-digit';
+                formatOptions.month = 'short';
+            }
+
+            const lastTimeStr = lastSeenDate.toLocaleString([], formatOptions);
+            if (lastSeenTs){
+                indicator.title = `Last seen: ${lastTimeStr}`;
+            } else {
+                indicator.title = `No recent activity`;
+            }
+
+        }
+    }
+    function checkInitialStatus() {
+        const lastSeen = localStorage.getItem(lastSeenKey);
+        const now = Date.now();
+
+        if (lastSeen && (now - lastSeen < STATUS_THRESHOLD)) {
+            setOnline();
+        } else {
+            setOffline();
+        }
+    }
+
+    window.updateBadge = function() {
+        const unreadKey = `notifications_unread_{{user.userID}}_{{user.caregiverID}}`;
+        const badge = document.getElementById('notifications-badge');
+        const unreadCount = parseInt(localStorage.getItem(unreadKey) || '0', 10);
+
+        if (badge) {
+            if (unreadCount > 0) {
+                badge.textContent = unreadCount > 99 ? '99+' : unreadCount;
+                badge.style.display = 'flex'; 
+            } else {
+                badge.style.display = 'none';
+            }
+        }
+    };
+
+    window.updateCommBadge = function(newMessage = false) {
+    const badgeKey = `communications_unread`;
+    const badge = document.getElementById('communications-badge');
+
+ 
+    if (newMessage) {
+        let currentCount = parseInt(localStorage.getItem(badgeKey) || '0', 10);
+        currentCount += 1;
+        localStorage.setItem(badgeKey, currentCount);
+    }
+
+    const unreadCount = parseInt(localStorage.getItem(badgeKey) || '0', 10);
+
+    if (badge) {
+        if (unreadCount > 0) {
+            badge.textContent = unreadCount > 99 ? '99+' : unreadCount;
+            badge.style.display = 'flex';
+        } else {
+            badge.style.display = 'none';
+        }
+    }
+};
+
+window.clearCommBadge = function() {
+    const badgeKey = `communications_unread`;
+    localStorage.setItem(badgeKey, 0);
+    const badge = document.getElementById('communications-badge');
+    if (badge) badge.style.display = 'none';
+};
+    if (!!window.SharedWorker) {
+        console.log("creating new worker")
+        window.mqttWorker = new SharedWorker("/js/mqtt-worker.js");
+        window.mqttWorker.port.start();
+
+        window.mqttWorker.port.postMessage({
+            type: 'CONNECT',
+            config: {
+                brokerUrl: 'ws://{{@root.mqttBrokerIp}}:9001',
+                options: {
+                    clientId: 'team08_2025_web' + "{{user.userID}}",
+                    clean: false 
+                }
+            }
+        });
+
+        window.mqttWorker.port.postMessage({
+            type: 'SUBSCRIBE',
+            topic: `team08_2025/glasses/{{user.userID}}/uplink/+`
+        });
+        window.mqttWorker.port.onmessage = function (e) {
+            console.log("Message from MQTT Worker:", e.data);
+            const { type, topic, payload } = e.data;
+            if (type === 'MQTT_MESSAGE' && topic.endsWith('uplink/communication')) {
+                const msgData = JSON.parse(payload);
+                const storageKey = `chat_history_{{user.userID}}_{{user.caregiverID}}`;
+                console.log("Received message:", msgData);
+                console.log(typeof msgData);
+                window.updateCommBadge(true);
+                console.log(msgData.message);
+                console.log(msgData.timestamp);
+                const [, month, day, year, hour, minute, period] =
+                msgData.timestamp.match(/(\d+)\/(\d+)\/(\d+)\s+(\d+):(\d+):\d+\s*(μ\.μ\.|π\.μ\.)/);
+
+                let history = JSON.parse(localStorage.getItem(storageKey) || '[]');
+                history.push({
+                    text: msgData.message,
+                    time: `${day}/${month}/${year}, ${parseInt(hour)}:${minute} ${period.replace(/\./g, "")}`,
+                    type: 'incoming'
+                });
+
+                if (history.length > 20) history.shift();
+                localStorage.setItem(storageKey, JSON.stringify(history));
+
+                
+                if (typeof window.updateChatUI === 'function') {
+                    window.updateChatUI();
+                }
+            }
+           else if (type === 'MQTT_MESSAGE' && topic.endsWith('uplink/alert_high_heart_rate')) {
+            console.log("Received MQTT message for high heart rate alert:", payload);
+    try {
+        const alertData = JSON.parse(payload);
+        const entity = alertData.data?.[0];
+        console.log("Parsed alert data:", alertData);
+        if (!entity) return;
+
+        const alert = entity.alert_highHeartRate?.value;
+        if (!alert || !alert.active) return; 
+
+        const now = new Date().toISOString();
+
+        const item = {
+            id: `${entity.id}_high_heart_rate_${alert.ts || now}`,
+            deviceId: entity.id,
+            kind: "User's Vitals",
+            value: alert.value, 
+            ts: alert.ts || now,
+            receivedAt: now,
+            title: 'High Heart Rate',
+            description: `The user's heart rate is elevated at ${alert.value} bpm. Please monitor their condition closely.`,
+            raw: alert
+        };
+
+        window.addNotification(item); 
+
+        console.log('Received high heart rate alert:', item);
+
+                // Persist to localStorage
+                let history = JSON.parse(localStorage.getItem(storageKey) || '[]');
+                history = history.concat(item);
+                // keep newest first
+                history = history.slice(-100);
+                localStorage.setItem(storageKey, JSON.stringify(history));
+
+                // Increment unread counter
+                const unreadKey = `notifications_unread_{{user.userID}}_{{user.caregiverID}}`;
+                let unread = parseInt(localStorage.getItem(unreadKey) || '0', 10) || 0;
+                unread += items.length;
+                localStorage.setItem(unreadKey, String(unread));
+
+                // Notify current page to update UI
+                if (typeof window.updateNotificationsUI === 'function') {
+                  window.updateNotificationsUI();
+                }
+                if (typeof window.updateBadge === 'function') {
+                  window.updateBadge();
+                }
+
+                console.log('Received alert items:', items);
+              } catch (err) {
+                console.error('Failed to parse alert payload', err, payload);
+              }
+            }
+            else if (type === 'MQTT_MESSAGE' && topic.endsWith('uplink/alert_fall')) {
+    try {
+        const alertData = JSON.parse(payload);
+        const entity = alertData.data?.[0];
+        if (!entity) return;
+
+        const alert = entity.alert_fall?.value;
+
+        const now = new Date().toISOString();
+
+        const item = {
+            id: `${entity.id}_fall_${alert.ts || now}`,
+            deviceId: entity.id,
+            kind: "User's Vitals",
+            value: alert.value, 
+            ts: alert.ts || now,
+            receivedAt: now,
+            title: 'Fall Detected',
+            description: `A fall has been detected. Please ensure the user is safe and conscious.`,
+            raw: alert
+        };
+
+        window.addNotification(item); 
+
+        console.log('Received fall alert:', item);
+
+                // Persist to localStorage
+                let history = JSON.parse(localStorage.getItem(storageKey) || '[]');
+                history = history.concat(item);
+                // keep newest first
+                history = history.slice(-100);
+                localStorage.setItem(storageKey, JSON.stringify(history));
+
+                // Increment unread counter
+                const unreadKey = `notifications_unread_{{user.userID}}_{{user.caregiverID}}`;
+                let unread = parseInt(localStorage.getItem(unreadKey) || '0', 10) || 0;
+                unread += items.length;
+                localStorage.setItem(unreadKey, String(unread));
+
+                // Notify current page to update UI
+                if (typeof window.updateNotificationsUI === 'function') {
+                  window.updateNotificationsUI();
+                }
+                if (typeof window.updateBadge === 'function') {
+                  window.updateBadge();
+                }
+
+                console.log('Received alert items:', items);
+              } catch (err) {
+                console.error('Failed to parse alert payload', err, payload);
+              }
+            }
+
+            else if (type === 'MQTT_MESSAGE' && topic.endsWith('uplink/alert_battery')) {
+    try {
+        const alertData = JSON.parse(payload);
+        const entity = alertData.data?.[0];
+        if (!entity) return;
+
+        const alert = entity.alert_battery?.value;
+         if (!alert || !alert.active) return; 
+        const now = new Date().toISOString();
+
+        const item = {
+            id: `${entity.id}_battery_${alert.ts || now}`,
+            deviceId: entity.id,
+            kind: 'Glasses Status',
+            value: alert.value, 
+            ts: alert.ts || now,
+            receivedAt: now,
+            title: 'Battery Alert',
+            description: `The smart glasses battery is running low at ${alert.value}%. Please charge the device soon.`,
+            raw: alert
+        };
+
+        window.addNotification(item); 
+
+        console.log('Received battery alert:', item);
+
+                // Persist to localStorage
+                let history = JSON.parse(localStorage.getItem(storageKey) || '[]');
+                history = history.concat(item);
+                // keep newest first
+                history = history.slice(-100);
+                localStorage.setItem(storageKey, JSON.stringify(history));
+
+                // Increment unread counter
+                const unreadKey = `notifications_unread_{{user.userID}}_{{user.caregiverID}}`;
+                let unread = parseInt(localStorage.getItem(unreadKey) || '0', 10) || 0;
+                unread += items.length;
+                localStorage.setItem(unreadKey, String(unread));
+
+                // Notify current page to update UI
+                if (typeof window.updateNotificationsUI === 'function') {
+                  window.updateNotificationsUI();
+                }
+                if (typeof window.updateBadge === 'function') {
+                  window.updateBadge();
+                }
+
+                console.log('Received alert items:', items);
+              } catch (err) {
+                console.error('Failed to parse alert payload', err, payload);
+              }
+            }
+             else if (type === 'MQTT_MESSAGE' && topic.endsWith('uplink/alert_memory')) {
+                try {
+                const alertData = JSON.parse(payload);
+                const entity = alertData.data?.[0];
+                if (!entity) return;
+
+                const alert = entity.alert_memory?.value;
+                if (!alert || !alert.active) return;
+                const now = new Date().toISOString();
+
+                const item = {
+                    id: `${entity.id}_memory_${alert.ts || now}`,
+                    deviceId: entity.id,
+                    kind: 'Glasses Status',
+                    value: alert.value, 
+                    ts: alert.ts || now,
+                    receivedAt: now,
+                    title: 'Memory Alert',
+                    description: `The smart glasses memory usage is high at ${alert.value}%. Consider closing unused applications.`,
+                    raw: alert
+                };
+
+                window.addNotification(item); 
+
+                console.log('Received memory alert:', item);
+
+                // Persist to localStorage
+                let history = JSON.parse(localStorage.getItem(storageKey) || '[]');
+                history = history.concat(item);
+                // keep newest first
+                history = history.slice(-100);
+                localStorage.setItem(storageKey, JSON.stringify(history));
+
+                // Increment unread counter
+                const unreadKey = `notifications_unread_{{user.userID}}_{{user.caregiverID}}`;
+                let unread = parseInt(localStorage.getItem(unreadKey) || '0', 10) || 0;
+                unread += items.length;
+                localStorage.setItem(unreadKey, String(unread));
+
+                // Notify current page to update UI
+                if (typeof window.updateNotificationsUI === 'function') {
+                  window.updateNotificationsUI();
+                }
+                if (typeof window.updateBadge === 'function') {
+                  window.updateBadge();
+                }
+
+                console.log('Received alert items:', items);
+              } catch (err) {
+                console.error('Failed to parse alert payload', err, payload);
+              }
+            }
+            else if (type === 'MQTT_MESSAGE' && topic.endsWith('uplink/alert_cpu')) {
+                try {
+                const alertData = JSON.parse(payload);
+                const entity = alertData.data?.[0];
+                if (!entity) return;
+
+                const alert = entity.alert_cpu?.value;
+                if (!alert || !alert.active) return; 
+                const now = new Date().toISOString();
+
+                const item = {
+                    id: `${entity.id}_cpu_${alert.ts || now}`,
+                    deviceId: entity.id,
+                    kind: 'Glasses Status',
+                    value: alert.value, 
+                    ts: alert.ts || now,
+                    receivedAt: now,
+                    title: 'CPU Alert',
+                    description: `The smart glasses CPU usage is high at ${alert.value}%. Try restarting the device if performance slows down.`,
+                    raw: alert
+                };
+
+                window.addNotification(item); 
+
+                console.log('Received CPU alert:', item);
+
+                // Persist to localStorage
+                let history = JSON.parse(localStorage.getItem(storageKey) || '[]');
+                history = history.concat(item);
+                // keep newest first
+                history = history.slice(-100);
+                localStorage.setItem(storageKey, JSON.stringify(history));
+
+                // Increment unread counter
+                const unreadKey = `notifications_unread_{{user.userID}}_{{user.caregiverID}}`;
+                let unread = parseInt(localStorage.getItem(unreadKey) || '0', 10) || 0;
+                unread += items.length;
+                localStorage.setItem(unreadKey, String(unread));
+
+                // Notify current page to update UI
+                if (typeof window.updateNotificationsUI === 'function') {
+                  window.updateNotificationsUI();
+                }
+                if (typeof window.updateBadge === 'function') {
+                  window.updateBadge();
+                }
+
+                console.log('Received alert items:', items);
+              } catch (err) {
+                console.error('Failed to parse alert payload', err, payload);
+              }
+            }
+            else if (type === 'MQTT_MESSAGE' && topic.endsWith('uplink/alert_temperature')) {
+                try {
+                const alertData = JSON.parse(payload);
+                const entity = alertData.data?.[0];
+                if (!entity) return;
+
+                const alert = entity.alert_temperature?.value;
+                if (!alert || !alert.active) return; 
+                const now = new Date().toISOString();
+
+                const item = {
+                    id: `${entity.id}_temperature_${alert.ts || now}`,
+                    deviceId: entity.id,
+                    kind: 'Glasses Status',
+                    value: alert.value, 
+                    ts: alert.ts || now,
+                    receivedAt: now,
+                    title: 'Temperature Alert',
+                    description: `The smart glasses temperature is elevated at ${alert.value}°C. Move the device to a cooler location.`,
+                    raw: alert
+                };
+
+                window.addNotification(item);
+
+                console.log('Received Temperature alert:', item);
+
+                // Persist to localStorage
+                let history = JSON.parse(localStorage.getItem(storageKey) || '[]');
+                history = history.concat(item);
+                // keep newest first
+                history = history.slice(-100);
+                localStorage.setItem(storageKey, JSON.stringify(history));
+
+                // Increment unread counter
+                const unreadKey = `notifications_unread_{{user.userID}}_{{user.caregiverID}}`;
+                let unread = parseInt(localStorage.getItem(unreadKey) || '0', 10) || 0;
+                unread += items.length;
+                localStorage.setItem(unreadKey, String(unread));
+
+                // Notify current page to update UI
+                if (typeof window.updateNotificationsUI === 'function') {
+                  window.updateNotificationsUI();
+                }
+                if (typeof window.updateBadge === 'function') {
+                  window.updateBadge();
+                }
+
+                console.log('Received alert items:', items);
+              } catch (err) {
+                console.error('Failed to parse alert payload', err, payload);
+              }
+            }
+             else if (type === 'MQTT_MESSAGE' && topic.endsWith('uplink/alert_lowOxygen')) {
+                try {
+                const alertData = JSON.parse(payload);
+                const entity = alertData.data?.[0];
+                if (!entity) return;
+
+                const alert = entity.alert_lowOxygen?.value;
+                if (!alert || !alert.active) return; 
+                const now = new Date().toISOString();
+
+                const item = {
+                    id: `${entity.id}_lowOxygen_${alert.ts || now}`,
+                    deviceId: entity.id,
+                    kind: "User's Vitals",
+                    value: alert.value, 
+                    ts: alert.ts || now,
+                    receivedAt: now,
+                    title: 'Low Oxygen Alert',
+                    description: `The user's oxygen saturation is low at ${alert.value}%. Please ensure they are breathing normally and provide fresh air if needed.`,
+                    raw: alert
+                };
+
+                window.addNotification(item); 
+
+                console.log('Received Low Oxygen alert:', item);
+
+                // Persist to localStorage
+                let history = JSON.parse(localStorage.getItem(storageKey) || '[]');
+                history = history.concat(item);
+                // keep newest first
+                history = history.slice(-100);
+                localStorage.setItem(storageKey, JSON.stringify(history));
+
+                // Increment unread counter
+                const unreadKey = `notifications_unread_{{user.userID}}_{{user.caregiverID}}`;
+                let unread = parseInt(localStorage.getItem(unreadKey) || '0', 10) || 0;
+                unread += items.length;
+                localStorage.setItem(unreadKey, String(unread));
+
+                // Notify current page to update UI
+                if (typeof window.updateNotificationsUI === 'function') {
+                  window.updateNotificationsUI();
+                }
+                if (typeof window.updateBadge === 'function') {
+                  window.updateBadge();
+                }
+
+                console.log('Received alert items:', items);
+              } catch (err) {
+                console.error('Failed to parse alert payload', err, payload);
+              }
+            }
+            if (type === 'MQTT_MESSAGE' && topic.includes(`team08_2025/glasses/{{user.userID}}`)) { 
+              if (!topic.includes("communication") && !topic.includes("alert")) {
+            setOnline(); } 
+        }
+        };
+    }
+    window.addEventListener('beforeunload', () => {
+    if (window.mqttWorker) {
+        window.mqttWorker.port.postMessage({ type: 'UNLOAD' });
+    }
+});
+  console.log("ended")
+ document.addEventListener('DOMContentLoaded', () => {
+      checkInitialStatus();
+      
+      if (typeof window.updateBadge === 'function') {
+          window.updateBadge();
+      }
+  });
+
+
+(function () {
+  function getStorageKeys() {
+    const uID = '{{user.userID}}';
+    const cID = '{{user.caregiverID}}';
+    return {
+      historyKey: `notifications_history_${uID}_${cID}`,
+      unreadKey: `notifications_unread_${uID}_${cID}`
+    };
+  }
+
+  window.addNotification = function(item) {
+    const { historyKey, unreadKey } = getStorageKeys();
+    let history = JSON.parse(localStorage.getItem(historyKey) || '[]');
+
+    if (history.find(n => n.id === item.id)) return;
+
+    history.push(item);
+    if (history.length > 100) history.shift();
+    localStorage.setItem(historyKey, JSON.stringify(history));
+
+    const unread = parseInt(localStorage.getItem(unreadKey) || '0', 10) || 0;
+    localStorage.setItem(unreadKey, String(unread + 1));
+
+    if (typeof window.updateBadge === 'function') {
+      window.updateBadge();
+    }
+    if (typeof window.updateNotificationsUI === 'function') {
+      window.updateNotificationsUI();
+    }
+  };
+
+  
+  window.getStorageKeys = getStorageKeys;
+})();
+  
+  (function () {
+    function updateHeaderBadge() {
+      try {
+        const badge = document.getElementById('notifications-badge');
+        if (!badge) return;
+        const unreadKey = `notifications_unread_{{user.userID}}_{{user.caregiverID}}`;
+        const unread = parseInt(localStorage.getItem(unreadKey) || '0', 10) || 0;
+
+        if (unread > 0) {
+          badge.textContent = unread > 99 ? '99+' : unread;
+          badge.style.display = 'inline-block';
+        } else {
+          badge.style.display = 'none';
+        }
+      } catch (e) {
+        console.error("Badge update error:", e);
+      }
+    }
+
+    
+    window.updateBadge = updateHeaderBadge;
+
+    
+    document.addEventListener('DOMContentLoaded', updateHeaderBadge);
+    window.addEventListener('storage', updateHeaderBadge);
+  })();
+  </script>
+  {{/if}}
+
+
+
+</body>
+</html>

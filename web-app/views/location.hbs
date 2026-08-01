@@ -1,0 +1,64 @@
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+<button
+  id="timeRangeToggle"
+  class="time-range-toggle"
+  title="Show Route Options"
+>⏱️</button>
+<div class="time-range-controls" id="timeRangeControls">
+  <div class="controls-header"> Show Route Options</div>
+  <div class="radio-group">
+    <div class="radio-item">
+      <input type="radio" name="timeRange" value="0" id="off" checked />
+      <label for="off">
+        <span class="radio-dot"></span>
+        <span class="radio-text">Now</span>
+      </label>
+    </div>
+    <div class="radio-item">
+      <input type="radio" name="timeRange" value="1h" id="1h" />
+      <label for="1h">
+        <span class="radio-dot"></span>
+        <span class="radio-text">1 hour</span>
+      </label>
+    </div>
+    <div class="radio-item">
+      <input type="radio" name="timeRange" value="4h" id="4h" />
+      <label for="4h">
+        <span class="radio-dot"></span>
+        <span class="radio-text">4 hours</span>
+      </label>
+    </div>
+    <div class="radio-item">
+      <input type="radio" name="timeRange" value="8h" id="8h" />
+      <label for="8h">
+        <span class="radio-dot"></span>
+        <span class="radio-text">8 hours</span>
+      </label>
+    </div>
+    <div class="radio-item">
+      <input type="radio" name="timeRange" value="24h" id="24h" />
+      <label for="24h">
+        <span class="radio-dot"></span>
+        <span class="radio-text">24 hours</span>
+      </label>
+    </div>
+  </div>
+</div>
+<div id="map" class="map-container"></div>
+
+<script>
+  let currentLocation ={{{currentLocation}}}; 
+  const currentUserID = "{{user.userID}}"; 
+  const routePath ={{{pathData}}}; 
+  const toggleBtn = document.getElementById('timeRangeToggle'); const controlsPanel =
+  document.getElementById('timeRangeControls');
+  toggleBtn.addEventListener('click', () => {
+  controlsPanel.classList.toggle('show'); }); 
+  document.querySelectorAll('input[name="timeRange"]').forEach(radio => {
+  radio.addEventListener('change', () => {
+  controlsPanel.classList.remove('show'); }); });
+</script>
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script
+  src="https://cdn.jsdelivr.net/npm/leaflet-polylinedecorator@1.6.0/dist/leaflet.polylineDecorator.js"
+></script>

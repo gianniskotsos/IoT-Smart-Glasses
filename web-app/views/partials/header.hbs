@@ -1,0 +1,47 @@
+<header class="app-header">
+  <div class="header-wrapper">
+    <div class="header-left">
+      <a href="/home" class="app-title">
+        Smart Glasses Monitor
+      </a>
+      {{#if user.name}}
+      {{!-- <span id="user-subtitle" class="user-subtitle">{{user.name}}{{#if user.age}} · {{user.age}} years old{{/if}}</span> --}}
+      <span id="user-subtitle" class="user-subtitle">{{user.name}} {{user.surname}}</span>
+
+      {{/if}}
+    </div>
+    <div class="header-right">
+      <span id="user-status-indicator" class="status-indicator offline">
+            <span class="status-dot"></span>
+            <span id="status-text">Offline</span>
+     </span>
+    </div>
+  </div>
+
+  <nav class="main-nav">
+    <a href="/live-view/{{user.userID}}" class="nav-link {{#ifEquals activeTab 'live-view'}}active{{/ifEquals}}">
+      <i class="fa-solid fa-video"></i>
+      <span>Live View</span>
+    </a>
+    <a href="/location/{{user.userID}}" class="nav-link {{#ifEquals activeTab 'location'}}active{{/ifEquals}}">
+      <i class="fa-solid fa-location-dot"></i>
+      <span>Location</span>
+    </a>
+    <a href="/monitoring/{{user.userID}}" class="nav-link {{#ifEquals activeTab 'monitoring'}}active{{/ifEquals}}">
+      <i class="fa-solid fa-heart-pulse"></i>
+      <span>Monitoring</span>
+    </a>
+    <a href="/notifications/{{user.userID}}" class="nav-link {{#ifEquals activeTab 'notifications'}}active{{/ifEquals}}">
+        <div class="icon-container" style="position: relative; display: inline-block;">
+              <i class="fa-solid fa-bell"></i>
+              <span id="notifications-badge" class="unread-badge" style="display:none"></span>
+        </div>
+        <span>Notifications</span>
+    </a>
+    <a href="/communication/{{user.userID}}" class="nav-link {{#ifEquals activeTab 'communication'}}active{{/ifEquals}}">
+      <i class="fa-solid fa-comments"></i>
+      <span>Communication</span>
+      <span id="communications-badge"></span>
+    </a>
+  </nav>
+</header>

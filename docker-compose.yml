@@ -1,0 +1,79 @@
+services:
+
+  ai-gateway:
+      build: ./AI_Gateway
+      container_name: vlm_gateway
+      restart: unless-stopped
+      environment:
+        - BROKER_IP=${BROKER_IP}
+        - BROKER_PORT=${BROKER_PORT}
+        - VLM_API_URL=${VLM_API_URL}
+        - VLM_API_KEY=${VLM_API_KEY}
+        - VLM_MODEL_NAME=${VLM_MODEL_NAME}
+        - VMS_IP=${VMS_IP}
+        - VMS_PORT=${VMS_PORT}
+  heart-rate-faker:
+    build: ./fakers
+    container_name: hr_faker
+    restart: unless-stopped
+    environment:
+      - BROKER_IP=${BROKER_IP}
+      - BROKER_PORT=${BROKER_PORT}
+      - DEVICE_ID=${DEVICE_ID}
+  glass-messenger:
+    build: ./glass_sdk
+    container_name: glass_messenger
+    restart: unless-stopped
+    environment:
+      - BROKER_IP=${BROKER_IP}
+      - BROKER_PORT=${BROKER_PORT}    
+  vms:
+    build: ./vms
+    container_name: vms
+    restart: unless-stopped
+    ports:
+      - "7090:7090"  # HTTP Web UI & Snapshot API
+      - "7091:7091"  # TCP Video Ingest Port 
+  cb-initializer:
+    build: ./ingestion-point/Orion_subscriptions
+    container_name: fiware_initializer
+    restart: on-failure
+    environment:
+      - ORION_SUBSCRIPTION_URL=${ORION_SUBSCRIPTION_URL}
+      - BROKER_IP=${BROKER_IP}
+      - BROKER_PORT=${BROKER_PORT}
+  ingestion-backend:
+    build: ./ingestion-point
+    container_name: ingestion_backend
+    restart: unless-stopped
+    environment:
+      - BROKER_IP=${BROKER_IP}
+      - BROKER_PORT=${BROKER_PORT}
+      - ORION_ENTITIES_URL=${ORION_ENTITIES_URL}
+      - INFLUXDB_URL=${INFLUXDB_URL}
+      - INFLUXDB_BUCKET=${INFLUXDB_BUCKET}
+      - INFLUXDB_ORG=${INFLUXDB_ORG}
+      - INFLUXDB_TOKEN=${INFLUXDB_TOKEN}
+  fitness-ingestion:
+    build: ./ingestion-point/Fitness-ingestion
+    container_name: fitness_ingestion
+    restart: unless-stopped
+    environment:
+      - BROKER_IP=${BROKER_IP}
+      - BROKER_PORT=${BROKER_PORT}
+      - GOOGLE_ACCESS_TOKEN=${GOOGLE_ACCESS_TOKEN}
+      - GOOGLE_REFRESH_TOKEN=${GOOGLE_REFRESH_TOKEN}
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}      
+      - ORION_ENTITIES_URL=${ORION_ENTITIES_URL}
+      - INFLUXDB_URL=${INFLUXDB_URL}
+      - INFLUXDB_BUCKET=${INFLUXDB_BUCKET}
+      - INFLUXDB_ORG=${INFLUXDB_ORG}
+      - INFLUXDB_TOKEN=${INFLUXDB_TOKEN}    
+  mqtt-republisher:
+    build: ./ingestion-point/Republisher
+    container_name: mqtt_republisher
+    restart: unless-stopped
+    environment:
+      - BROKER_IP=${BROKER_IP}
+      - BROKER_PORT=${BROKER_PORT}    

@@ -1,0 +1,239 @@
+body,
+html {
+  height: 100%;
+  background-color: #edf2f7;
+}
+
+/* CAMERA ACTIVE VIEW */
+#camera-active-view {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+}
+
+#live-video-stream {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 1;
+}
+
+
+#deactivate-camera-btn {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(229, 83, 83, 0.7);
+  color: white;
+  border: none;
+  padding: 14px 24px;
+  font-size: 16px;
+  border-radius: 30px;
+  cursor: pointer;
+  z-index: 10;
+  opacity: 0;
+  backdrop-filter: blur(6px);
+  box-shadow: 0 8px 20px rgba(229, 83, 83, 0.4);
+  transition:
+    opacity 0.3s ease,
+    transform 0.2s ease;
+}
+
+#camera-active-view:hover #deactivate-camera-btn {
+  opacity: 1;
+}
+
+/* CAMERA DISABLED VIEW */
+#camera-disabled-view {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  background: linear-gradient(135deg, #eef5ff, #fdfefe);
+  color: #2d3748;
+  text-align: center;
+}
+
+/* ICON */
+.camera-icon-wrapper {
+  margin-bottom: 20px;
+}
+
+.camera-icon-wrapper i {
+  font-size: 60px;
+  color: #4c7fd9;
+}
+
+/* STATUS MESSAGE */
+.status-message {
+  font-size: 18px;
+  margin-bottom: 25px;
+  color: #5a667a;
+}
+
+/* ACTIVATE BUTTON  */
+.activate-button {
+  background: linear-gradient(135deg, #5a8dee, #4c7fd9);
+  color: #ffffff;
+  border: none;
+  padding: 12px 22px;
+  margin: 10px;
+  border-radius: 4px; 
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 600;
+  box-shadow: 0 6px 14px rgba(76, 127, 217, 0.35);
+  transition: all 0.25s ease;
+}
+
+.activate-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 22px rgba(76, 127, 217, 0.45);
+}
+
+.activate-button:active {
+  transform: translateY(0);
+}
+
+/* ACTIVE VIEW */
+.active-view {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+}
+
+/* STATUS PROPERTIES OVERLAY */
+.status-properties {
+  color: #ffffff;
+  background: rgba(45, 55, 72, 0.75);
+  backdrop-filter: blur(6px);
+  font-size: 18px;
+  width: 100%;
+  text-align: left;
+}
+
+.status-properties ul {
+  list-style-type: none;
+  padding-left: 10px;
+}
+
+.status-properties h3 {
+  padding-left: 10px;
+}
+
+/* VITALS TOGGLE BUTTON */
+.vitals-toggle {
+  position: absolute;
+  bottom: 30px;
+  right: 20px;
+  z-index: 1001;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #357bdc 0%, #2389c8 100%);
+  border: none;
+  color: white;
+  font-size: 1.5rem;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(220, 53, 69, 0.4);
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.vitals-toggle:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 16px rgba(220, 53, 69, 0.6);
+}
+
+.vitals-toggle:active {
+  transform: scale(0.95);
+}
+
+/* VITALS CONTROLS PANEL */
+.vitals-controls {
+  position: fixed;
+  bottom: 10px;
+  right: 20px;
+  z-index: 1000;
+  background: rgba(255, 255, 255, 0.35);
+  padding: 16px 20px;
+  border-radius: 18px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  opacity: 0;
+  transform: translateY(20px) scale(0.95);
+  pointer-events: none;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  max-width: 350px;
+}
+
+.vitals-controls.show {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  pointer-events: all;
+}
+
+.controls-header {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #1a202c;
+  margin-bottom: 10px;
+  text-align: center;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  background: linear-gradient(135deg, #357bdc 0%, #2389c8 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.vitals-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.vital-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 12px;
+  background: linear-gradient(135deg, #f5f8fc 0%, #fafbfd 100%);
+  border-radius: 12px;
+  border: 1.5px solid #e5ecf5;
+  transition: all 0.25s ease;
+}
+
+.vital-item:hover {
+  background: linear-gradient(135deg, #ecf2f8 0%, #f5f9fc 100%);
+  border-color: #d0dce8;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(53, 123, 220, 0.15);
+}
+
+.vital-label {
+  font-weight: 700;
+  color: #3a4563;
+  font-size: 0.8rem;
+  text-transform: capitalize;
+  letter-spacing: 0.2px;
+}
+
+.vital-value {
+  font-weight: 700;
+  font-size: 0.9rem;
+  padding: 6px 12px;
+  background: linear-gradient(135deg, #357bdc 0%, #2389c8 100%);
+  color: white;
+  border-radius: 10px;
+  box-shadow: 0 3px 10px rgba(53, 123, 220, 0.35);
+  min-width: 60px;
+  text-align: center;
+}

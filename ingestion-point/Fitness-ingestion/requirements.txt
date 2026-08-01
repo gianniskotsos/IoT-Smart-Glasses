@@ -1,0 +1,4 @@
+google-auth-oauthlib==1.0.0
+google-api-python-client==2.95.0
+influxdb-client==1.36.0
+requests==2.31.0

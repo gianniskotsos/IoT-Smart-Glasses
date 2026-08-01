@@ -1,0 +1,105 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background-color: #1a202c;
+  font-family: Arial, sans-serif;
+  color: #fff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.login-container {
+  display: block;
+  justify-content: center;
+  align-items: center;
+  background-color: #2d3748;
+  padding: 40px;
+  border-radius: 12px;
+  width: 30%;
+  box-shadow: 0 0 15px rgba(0,0,0,0.5);
+  text-align: center;
+}
+
+.login-container h1 {
+  margin-bottom: 24px;
+}
+
+.form-group {
+  margin-bottom: 16px;
+  text-align: left;
+}
+
+.form-group label {
+  display: block;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 8px 8px;
+  border-radius: 6px;
+  border: none;
+  font-size: 14px;
+}
+
+.login-form{
+    display: block;
+    justify-content: center;
+    align-items: center;
+}
+
+button {
+  width: 100%;
+  padding: 8px;
+  background-color: #2b6cb0;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #1a4d8c;
+}
+
+
+/* Modal styles */
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background: rgba(0,0,0,0.6);
+}
+
+.modal-content {
+  background: #fff;
+  margin: 15% auto;
+  color: #000;
+  padding: 20px;
+  border-radius: 12px;
+  width: 300px;
+  text-align: center;
+}
+
+.close {
+  color: #aaa;
+  align-self: self-end;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.close:hover {
+  color: #000;
+}

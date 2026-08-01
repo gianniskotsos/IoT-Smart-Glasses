@@ -1,0 +1,98 @@
+/* public/CSS/home.css */
+body {
+  background-color: #edf2f7;
+  font-family: Arial, sans-serif;
+  color: #2d3748;
+  margin: 0;
+  padding: 0;
+}
+
+/* HEADER */
+.home-header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 18px 28px;
+  background: linear-gradient(135deg, #eef5ff, #fdfefe);
+  border-bottom: 1px solid #dde5ee;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+}
+
+.home-header h1 {
+  margin: 0;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+}
+
+/* PRIMARY BUTTON */
+.home-header button {
+  background: linear-gradient(135deg, #5a8dee, #4c7fd9);
+  border: none;
+  color: #ffffff;
+  padding: 12px 22px;
+  border-radius: 999px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 6px 14px rgba(76, 127, 217, 0.35);
+  transition: all 0.25s ease;
+}
+
+.home-header button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 22px rgba(76, 127, 217, 0.45);
+}
+
+/* CONTENT */
+.users-list {
+  padding: 28px;
+}
+
+/* USER CARD */
+.user-card {
+  background-color: #fdfefe;
+  padding: 20px;
+  border-radius: 16px;
+  margin-bottom: 18px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.user-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.1);
+}
+
+.user-card h3 {
+  margin: 0 0 10px 0;
+  font-weight: 600;
+}
+
+.user-card p {
+  margin: 4px 0;
+  color: #5a667a;
+}
+
+/* CARD BUTTON */
+.user-card button.view-btn {
+  margin-top: 14px;
+  background: linear-gradient(135deg, #5a8dee, #4c7fd9);
+  border: none;
+  color: #ffffff;
+  padding: 10px 20px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 6px 14px rgba(76, 127, 217, 0.3);
+  transition: all 0.25s ease;
+}
+
+.user-card button.view-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 22px rgba(76, 127, 217, 0.4);
+}

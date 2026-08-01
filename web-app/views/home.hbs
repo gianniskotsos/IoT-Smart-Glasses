@@ -1,0 +1,25 @@
+
+<link rel="stylesheet" href="{{css}}">
+
+<div class="home-header">
+  <h1>Welcome, {{caregiver.surname}} {{caregiver.name}}</h1>
+  <button id="logout-btn">Logout</button>
+</div>
+
+<div class="users-list">
+  <h2>Your Users</h2>
+  <ul>
+    {{#each users}}
+      <li>
+        <div class="user-card" data-userid="{{userID}}">
+          <h3>{{name}} {{surname}}</h3>
+          <p>Age: {{age}}</p>
+          <p>Phone: {{telephone}}</p>
+          <button class="view-btn">View</button>
+        </div>
+      </li>
+    {{/each}}
+  </ul>
+</div>
+
+  <script src="{{customJs}}"></script>

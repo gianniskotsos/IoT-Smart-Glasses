@@ -1,0 +1,26 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+
+<div id="camera-active-view" class="active-view" style="display: none;">
+  <img id="live-video-stream" class="live-video" autoplay muted playsinline></img>
+  <button id="deactivate-camera-btn" class="activate-button" onclick="deactivateCamera()">Turn Camera Off</button>
+</div>
+
+<div id="camera-disabled-view" class="active-view">
+  <div class="camera-status-container">
+    <div class="camera-icon-wrapper">
+      <i class="fa-solid fa-video-slash"></i>
+    </div>
+    <p class="status-message">Camera is off.</p>
+    <button id="activate-camera-btn" class="activate-button" onclick="activateCamera()">
+        {{buttonText}}
+    </button>
+  </div>
+</div>
+
+<script>
+  const GLASS_STREAM_URL = "{{GLASS_STREAM_URL}}";
+</script>
+</html>

@@ -1,0 +1,30 @@
+services:
+  iot-app:
+    container_name: iot_rpi_app
+    build:
+      context: .
+      dockerfile: Dockerfile 
+    restart: unless-stopped
+    environment:
+      - BROKER_IP=${BROKER_IP} 
+      - BROKER_PORT=${BROKER_PORT}
+      - DEVICE_ID=${DEVICE_ID}
+      - VMS_IP=${VMS_IP}
+      - VMS_INGESTION_PORT=${VMS_INGESTION_PORT}
+    volumes:
+      - /run/udev:/run/udev:ro
+      - ./config.json:/app/config.json
+
+  iot-testing:
+    container_name: iot_testing_app
+    build:
+      context: .
+      dockerfile: Dockerfile.testing 
+    environment:
+      - BROKER_IP=${BROKER_IP}
+      - BROKER_PORT=${BROKER_PORT}
+      - DEVICE_ID=${DEVICE_ID}
+      - VMS_IP=${VMS_IP}
+      - VMS_INGESTION_PORT=${VMS_INGESTION_PORT}
+    volumes:
+      - ./config.json:/app/config.json

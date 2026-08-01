@@ -1,0 +1,209 @@
+body, html {
+  height: 100%;
+  background-color: #edf2f7; 
+}
+
+.notifications-page {
+  background: #f7f9fc;
+  padding: 24px;
+  min-height: 100vh;
+  color: #2d3748;
+}
+
+/* WIDGETS */
+.widgets-row {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.widget-card {
+  flex: 1;
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.05);
+}
+
+.widget-card i {
+  font-size: 28px;
+  color: #4c7fd9;
+}
+
+.widget-card h2 {
+  font-size: 24px;
+}
+
+.widget-card p {
+  font-weight: 600;
+  color: #5a667a;
+}
+
+/* NOTIFICATIONS CARD */
+.notifications-card {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.05);
+}
+
+.card-header h3 {
+  font-size: 20px;
+  color: #2d3748;
+}
+
+.card-header p {
+  color: #5a667a;
+}
+
+/* INDIVIDUAL NOTIFICATION */
+.notification-item {
+  margin-top: 20px;
+  padding: 16px;
+  border-radius: 12px;
+  background: #eef2f7;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.notification-item:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+}
+
+.notification-item.urgent {
+  border: 2px solid #f6ad55;
+}
+
+/* TOP SECTION OF NOTIFICATION */
+.notification-top {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.notification-top i {
+  font-size: 24px;
+  color: #4c7fd9;
+}
+
+.notification-info {
+  flex: 1;
+}
+
+.notification-info h4 {
+  font-size: 16px;
+  color: #2d3748;
+}
+
+.tag {
+  padding: 2px 8px;
+  border-radius: 8px;
+  font-size: 12px;
+}
+
+.tag.medium {
+  background: #4c7fd9;
+  color: white;
+}
+
+.time {
+  font-size: 12px;
+  color: #5a667a;
+}
+
+.description {
+  color: #4a5568;
+}
+
+/* ACTIONS */
+.notification-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+.notification-actions button {
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+button.primary {
+  background: #5a8dee;
+  color: white;
+  box-shadow: 0 6px 14px rgba(76,127,217,0.35);
+}
+
+button.primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 22px rgba(76,127,217,0.45);
+}
+
+button.secondary {
+  background: #a0aec0;
+  color: white;
+}
+
+button.secondary:hover {
+  background: #718096;
+}
+
+/* Additional styles for dynamic notifications list */
+#notifications-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.notification-empty {
+  text-align: center;
+  padding: 28px 12px;
+  color: #718096;
+  font-weight: 600;
+}
+
+/* Small unread badge that can be attached to actions or nav elements */
+.unread-badge {
+  position: absolute;
+  top: -8px;
+  right: 4px;
+  background: #ff5252;
+  color: white;
+  font-size: 0.7rem;
+  padding: 2px 6px;
+  border-radius: 10px;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(255, 82, 82, 0.4);
+}
+
+.unread-badge.hidden {
+  display: none;
+}
+
+
+/* Tighter layout for compact notifications */
+.notification-item.compact {
+  padding: 12px;
+  border-radius: 10px;
+}
+
+/* Subtle fade-in for newly received items */
+.notification-item {
+  opacity: 0;
+  transform: translateY(6px);
+  animation: notif-enter 220ms ease forwards;
+}
+
+@keyframes notif-enter {
+  to { opacity: 1; transform: translateY(0); }
+}
